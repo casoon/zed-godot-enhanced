@@ -1,0 +1,32 @@
+# Rust/Cargo
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# Zed Extension
+*.wasm
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+/build/
+/dist/
+*.log
+
+# Test artifacts
+/tests/results/
+coverage/
+
+# Temporary files
+tmp/
+*.tmp
