@@ -1,0 +1,18 @@
+[package]
+name = "zed_godot_enhanced"
+version = "1.0.0"
+edition = "2021"
+publish = false
+license = "MIT"
+authors = ["Julian Seidel"]
+description = "Enhanced Godot Engine support for Zed with complete validation and testing"
+
+[lib]
+path = "src/gdscript.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.7.0"
+
+[profile.release]
+strip = true
