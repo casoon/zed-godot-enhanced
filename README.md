@@ -1,39 +1,66 @@
-# 🎮 Zed Godot Enhanced Extension
+# Zed Godot Enhanced Extension
 
-**Complete Godot Engine support for Zed Editor** with enhanced features, validation, and 100% completeness.
+Experimental Godot support for Zed Editor, based on GDQuest's GDScript extension.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/jseidel/zed-godot-enhanced)
+This repository is currently in an alpha/prototype state. The core extension files are present, but release readiness still needs real Zed runtime validation, automated tests, CI, corrected install documentation, and a verified WebAssembly build workflow.
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/casoon/zed-godot-enhanced)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
 
-## ✨ Features
+## Status
 
-### 🚀 Core Features
-- ✅ **GDScript Language Server Integration** - Full LSP support with autocomplete
-- ✅ **Syntax Highlighting** - Complete GDScript, GDShader, Godot Resource syntax
-- ✅ **Code Formatting** - `gdformat` integration for auto-formatting
-- ✅ **Debug Adapter** - Native Godot debugging in Zed
-- ✅ **Tree-sitter** - Advanced code parsing and navigation
-- ✅ **Symbol Outline** - Class, function, variable navigation
-- ✅ **Code Folding** - Intelligent code folding
-- ✅ **Bracket Matching** - Smart bracket/parenthesis matching
+| Area | Current state |
+|------|---------------|
+| Extension manifest | Present |
+| Rust extension code | Present, builds locally |
+| GDScript LSP command | Implemented via `nc`/`ncat`, needs runtime validation in Zed |
+| Godot debug adapter | Basic TCP adapter implementation present, needs runtime validation |
+| Tree-sitter language files | Present for GDScript, GDShader, and Godot Resource files |
+| Tests | `cargo test` currently runs 0 tests |
+| CI | Not configured yet |
+| Release packaging | Not verified yet |
+| Documentation | Work in progress |
 
-### 🎯 Enhanced Features (vs. GDQuest)
-- ✅ **Validation Scripts** - Automatic extension validation
-- ✅ **Better Error Handling** - Enhanced connection error messages
-- ✅ **Performance Monitoring** - LSP connection health checks
-- ✅ **Extended Documentation** - Complete setup and troubleshooting guides
-- ✅ **Test Suite** - Comprehensive test coverage
-- ✅ **CI/CD Integration** - Automated testing and releases
+Track the open release-readiness work in the issue tracker:
+
+- [#1 Add CI workflow for build, tests, and validation](https://github.com/casoon/zed-godot-enhanced/issues/1)
+- [#2 Add real automated tests for extension behavior](https://github.com/casoon/zed-godot-enhanced/issues/2)
+- [#3 Document and validate the correct Zed extension install path](https://github.com/casoon/zed-godot-enhanced/issues/3)
+- [#4 Align README completeness claims with actual project state](https://github.com/casoon/zed-godot-enhanced/issues/4)
+- [#5 Validate and document the Zed WASM extension build](https://github.com/casoon/zed-godot-enhanced/issues/5)
+- [#6 Create missing documentation files referenced by README](https://github.com/casoon/zed-godot-enhanced/issues/6)
+- [#7 Add missing validation scripts or remove stale references](https://github.com/casoon/zed-godot-enhanced/issues/7)
+- [#8 Add end-to-end validation in Zed with Godot LSP and debugger](https://github.com/casoon/zed-godot-enhanced/issues/8)
 
 ---
 
-## 📋 Requirements
+## Features
+
+### Implemented or scaffolded
+- **GDScript Language Server command** - connects to Godot's language server through `nc`/`ncat`
+- **Syntax highlighting files** - GDScript, GDShader, and Godot Resource query/config files are included
+- **Debug adapter configuration** - basic Godot TCP debug adapter setup is present
+- **Language configuration** - brackets, indentation, outlines, text objects, and file suffixes are configured where available
+- **Local validation script** - `scripts/validate.sh` checks repository structure and host Rust build status
+
+### Not yet proven release-ready
+- End-to-end extension loading in Zed
+- LSP autocomplete, hover, and go-to-definition against a running Godot project
+- Debug launch/attach behavior
+- Zed-compatible WebAssembly artifact build
+- Automated test coverage
+- CI/CD
+
+---
+
+## Requirements
 
 - **Zed Editor** (latest version)
 - **Godot Engine** 3.x or 4.x
 - **Netcat** (`nc` or `ncat`) for LSP communication
+- **Rust** for local development
 
 ### Installing Netcat
 
@@ -50,23 +77,22 @@ sudo dnf install nmap-ncat
 
 ---
 
-## 🚀 Installation
+## Installation
 
-### Method 1: From Zed Extensions (Recommended)
+This extension is not currently documented as published in the Zed extension registry. Use a local development install while the packaging and install-path work is being verified.
 
-1. Open Zed
-2. `Cmd+Shift+P` → "zed: extensions"
-3. Search for "Godot Enhanced"
-4. Click "Install"
-
-### Method 2: Manual Installation
+### Local development install
 
 ```bash
 # Clone repository
-git clone https://github.com/jseidel/zed-godot-enhanced.git
+git clone https://github.com/casoon/zed-godot-enhanced.git
 cd zed-godot-enhanced
 
-# Link to Zed extensions directory
+# Build the Rust extension locally
+cargo build
+
+# Link to the local Zed extensions directory used by your Zed installation.
+# This path is under review in issue #3.
 mkdir -p ~/.config/zed/extensions
 ln -s $(pwd) ~/.config/zed/extensions/godot-enhanced
 
@@ -75,7 +101,7 @@ ln -s $(pwd) ~/.config/zed/extensions/godot-enhanced
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### 1. Enable Godot Language Server
 
@@ -124,7 +150,7 @@ In **Godot Editor**:
 
 ---
 
-## 🐛 Debugging
+## Debugging
 
 Create `.zed/debug.json` in your project root:
 
@@ -145,11 +171,15 @@ Create `.zed/debug.json` in your project root:
 
 Press `F4` to start debugging session.
 
+Debugging support still needs end-to-end validation against a running Godot project. See [issue #8](https://github.com/casoon/zed-godot-enhanced/issues/8).
+
 ---
 
-## 🎨 Features in Detail
+## Features in Detail
 
 ### Language Server Protocol (LSP)
+
+The extension starts `nc`/`ncat` against Godot's language server on `127.0.0.1:6005` by default. In practice, the following editor features depend on a running Godot editor with the language server enabled:
 
 **Autocomplete:**
 - Classes, methods, properties
@@ -176,7 +206,8 @@ Press `F4` to start debugging session.
 
 ### Code Formatting
 
-With `gdformat` (optional):
+Formatting is configured through Zed settings and an external `gdformat` command. It is not provided by the Rust extension itself.
+
 ```bash
 # Install gdformat
 pip install gdformat
@@ -187,22 +218,21 @@ pip install gdformat
 
 ---
 
-## 🧪 Testing & Validation
+## Testing & Validation
 
-### Run Tests
+Current validation is limited. `scripts/validate.sh` checks required files and a local host Rust build. `cargo test` currently runs successfully but has no test cases.
 
 ```bash
 # Validation script
 ./scripts/validate.sh
 
-# Test LSP connection
-./scripts/test_lsp.sh
-
-# Run full test suite
+# Rust tests
 cargo test
 ```
 
-### Validation Checklist
+Missing validation scripts and stronger checks are tracked in [issue #7](https://github.com/casoon/zed-godot-enhanced/issues/7).
+
+### Release-readiness checklist
 
 - [ ] Extension loads in Zed
 - [ ] GDScript files recognized
@@ -211,36 +241,21 @@ cargo test
 - [ ] Syntax highlighting correct
 - [ ] Debugging functional
 - [ ] Formatting works
+- [ ] Zed-compatible WebAssembly build verified
+- [ ] Automated tests added
+- [ ] CI workflow passing
 
 ---
 
-## 📊 Completeness Metrics
+## Contributing
 
-| Component | Status | Coverage |
-|-----------|--------|----------|
-| GDScript LSP | ✅ Complete | 100% |
-| Syntax Highlighting | ✅ Complete | 100% |
-| Code Folding | ✅ Complete | 100% |
-| Symbol Outline | ✅ Complete | 100% |
-| Debug Adapter | ✅ Complete | 100% |
-| GDShader Support | ✅ Complete | 100% |
-| Godot Resources | ✅ Complete | 100% |
-| Documentation | ✅ Complete | 100% |
-| Tests | ✅ Complete | 95% |
-
-**Overall Completeness: 99%**
-
----
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contribution guidelines have not been written yet. See [issue #6](https://github.com/casoon/zed-godot-enhanced/issues/6).
 
 ### Development Setup
 
 ```bash
 # Clone repository
-git clone https://github.com/jseidel/zed-godot-enhanced.git
+git clone https://github.com/casoon/zed-godot-enhanced.git
 cd zed-godot-enhanced
 
 # Install dependencies
@@ -255,17 +270,22 @@ cargo test
 
 ---
 
-## 📚 Documentation
+## Documentation
 
-- [Setup Guide](docs/SETUP.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [LSP Configuration](docs/LSP.md)
-- [Debugging Guide](docs/DEBUGGING.md)
-- [API Reference](docs/API.md)
+The repository currently contains these docs:
+
+- [Quickstart](QUICKSTART.md)
+- [Manual install notes](MANUAL_INSTALL.md)
+- [Install steps](INSTALL_STEPS.md)
+- [Testing guide](TESTING_GUIDE.md)
+- [Project summary](PROJECT_SUMMARY.md)
+- [TODO](TODO.md)
+
+The previously linked `docs/*.md` files do not exist yet and are tracked in [issue #6](https://github.com/casoon/zed-godot-enhanced/issues/6).
 
 ---
 
-## 🙏 Credits
+## Credits
 
 Based on [GDQuest's zed-gdscript](https://github.com/GDQuest/zed-gdscript) extension.
 
@@ -280,33 +300,31 @@ Based on [GDQuest's zed-gdscript](https://github.com/GDQuest/zed-gdscript) exten
 
 ---
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file.
 
 ---
 
-## 🔗 Links
+## Links
 
-- **GitHub**: https://github.com/jseidel/zed-godot-enhanced
-- **Issues**: https://github.com/jseidel/zed-godot-enhanced/issues
+- **GitHub**: https://github.com/casoon/zed-godot-enhanced
+- **Issues**: https://github.com/casoon/zed-godot-enhanced/issues
 - **Zed Editor**: https://zed.dev
 - **Godot Engine**: https://godotengine.org
 
 ---
 
-## 🎯 Roadmap
+## Roadmap
 
-- [x] Core GDScript support
-- [x] LSP integration
-- [x] Debug adapter
-- [x] Syntax highlighting
-- [x] Code formatting
-- [ ] AI-assisted code completion
-- [ ] Advanced refactoring tools
-- [ ] Performance profiling integration
-- [ ] Multi-project workspace support
+- [x] Correct README and project status claims
+- [ ] Verify current Zed local extension install path
+- [ ] Verify WebAssembly extension build
+- [ ] Add real automated tests
+- [ ] Add CI workflow
+- [ ] Add LSP and debug smoke validation
+- [ ] Complete contributor and setup documentation
 
 ---
 
-**Made with ❤️ for the Godot community**
+Made for the Godot and Zed community.
