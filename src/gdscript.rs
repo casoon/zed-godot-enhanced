@@ -105,3 +105,47 @@ impl zed::Extension for GDScriptExtension {
 }
 
 zed::register_extension!(GDScriptExtension);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use zed_extension_api::{serde_json::json, Extension};
+
+    fn ext() -> GDScriptExtension {
+        GDScriptExtension
+    }
+
+    #[test]
+    fn dap_request_launch() {
+        let mut e = ext();
+        let v = json!({"request": "launch"});
+        assert!(matches!(
+            e.dap_request_kind("godot".into(), v),
+            Ok(StartDebuggingRequestArgumentsRequest::Launch)
+        ));
+    }
+
+    #[test]
+    fn dap_request_attach() {
+        let mut e = ext();
+        let v = json!({"request": "attach"});
+        assert!(matches!(
+            e.dap_request_kind("godot".into(), v),
+            Ok(StartDebuggingRequestArgumentsRequest::Attach)
+        ));
+    }
+
+    #[test]
+    fn dap_request_invalid_value() {
+        let mut e = ext();
+        let v = json!({"request": "step"});
+        assert!(e.dap_request_kind("godot".into(), v).is_err());
+    }
+
+    #[test]
+    fn dap_request_missing_key() {
+        let mut e = ext();
+        let v = json!({"host": "127.0.0.1"});
+        assert!(e.dap_request_kind("godot".into(), v).is_err());
+    }
+}

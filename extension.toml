@@ -2,10 +2,10 @@ id = "godot-enhanced"
 name = "Godot Enhanced"
 version = "1.0.0"
 schema_version = 1
-authors = ["Julian Seidel <jseidel@example.com>"]
-description = "Enhanced Godot game engine support for Zed. Complete support for GDScript with LSP, GDShader, and Godot Resources (.tres, .tscn). Based on GDQuest's extension with additional features and validations."
-repository = "https://github.com/jseidel/zed-godot-enhanced"
-homepage = "https://github.com/jseidel/zed-godot-enhanced"
+authors = ["Jörn Seidel <joern.seidel@casoon.de>"]
+description = "Godot Engine support for Zed — GDScript LSP, GDShader, and Godot Resource files. Based on GDQuest's zed-gdscript extension."
+repository = "https://github.com/casoon/zed-godot-enhanced"
+homepage = "https://github.com/casoon/zed-godot-enhanced"
 
 [grammars.gdscript]
 repository = "https://github.com/PrestonKnopp/tree-sitter-gdscript"
