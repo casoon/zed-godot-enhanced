@@ -2,7 +2,7 @@
 
 Experimental Godot support for Zed Editor, based on GDQuest's GDScript extension.
 
-This repository is currently in an alpha/prototype state. The core extension files are present, but release readiness still needs real Zed runtime validation, automated tests, CI, corrected install documentation, and a verified WebAssembly build workflow.
+This repository is currently in an alpha/prototype state. The core extension files are present, CI and tests are wired up, but end-to-end validation in a live Zed + Godot environment is still pending.
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/casoon/zed-godot-enhanced)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -18,20 +18,13 @@ This repository is currently in an alpha/prototype state. The core extension fil
 | GDScript LSP command | Implemented via `nc`/`ncat`, needs runtime validation in Zed |
 | Godot debug adapter | Basic TCP adapter implementation present, needs runtime validation |
 | Tree-sitter language files | Present for GDScript, GDShader, and Godot Resource files |
-| Tests | `cargo test` currently runs 0 tests |
-| CI | Not configured yet |
-| Release packaging | Not verified yet |
-| Documentation | Work in progress |
+| Tests | 4 unit tests for DAP request parsing (`cargo test`) |
+| CI | GitHub Actions workflow present (fmt, clippy, test, WASM build, validate.sh) |
+| Release packaging | WASM build target documented; Zed loading not yet validated |
+| Documentation | CONTRIBUTING.md, QUICKSTART.md, install guides present |
 
-Track the open release-readiness work in the issue tracker:
+Open release-readiness work:
 
-- [#1 Add CI workflow for build, tests, and validation](https://github.com/casoon/zed-godot-enhanced/issues/1)
-- [#2 Add real automated tests for extension behavior](https://github.com/casoon/zed-godot-enhanced/issues/2)
-- [#3 Document and validate the correct Zed extension install path](https://github.com/casoon/zed-godot-enhanced/issues/3)
-- [#4 Align README completeness claims with actual project state](https://github.com/casoon/zed-godot-enhanced/issues/4)
-- [#5 Validate and document the Zed WASM extension build](https://github.com/casoon/zed-godot-enhanced/issues/5)
-- [#6 Create missing documentation files referenced by README](https://github.com/casoon/zed-godot-enhanced/issues/6)
-- [#7 Add missing validation scripts or remove stale references](https://github.com/casoon/zed-godot-enhanced/issues/7)
 - [#8 Add end-to-end validation in Zed with Godot LSP and debugger](https://github.com/casoon/zed-godot-enhanced/issues/8)
 
 ---
@@ -43,15 +36,14 @@ Track the open release-readiness work in the issue tracker:
 - **Syntax highlighting files** - GDScript, GDShader, and Godot Resource query/config files are included
 - **Debug adapter configuration** - basic Godot TCP debug adapter setup is present
 - **Language configuration** - brackets, indentation, outlines, text objects, and file suffixes are configured where available
-- **Local validation script** - `scripts/validate.sh` checks repository structure and host Rust build status
+- **Local validation script** - `scripts/validate.sh` checks repository structure, tests, and WASM build
+- **CI** - GitHub Actions runs fmt, clippy, tests, and WASM build on every push
 
 ### Not yet proven release-ready
 - End-to-end extension loading in Zed
 - LSP autocomplete, hover, and go-to-definition against a running Godot project
 - Debug launch/attach behavior
-- Zed-compatible WebAssembly artifact build
-- Automated test coverage
-- CI/CD
+- Zed-compatible WebAssembly artifact verified to load in Zed
 
 ---
 
@@ -60,7 +52,7 @@ Track the open release-readiness work in the issue tracker:
 - **Zed Editor** (latest version)
 - **Godot Engine** 3.x or 4.x
 - **Netcat** (`nc` or `ncat`) for LSP communication
-- **Rust** for local development
+- **Rust** with `wasm32-wasip1` target (`rustup target add wasm32-wasip1`)
 
 ### Installing Netcat
 
@@ -79,25 +71,22 @@ sudo dnf install nmap-ncat
 
 ## Installation
 
-This extension is not currently documented as published in the Zed extension registry. Use a local development install while the packaging and install-path work is being verified.
-
-### Local development install
+This extension is not published in the Zed extension registry. Install as a local dev extension:
 
 ```bash
-# Clone repository
 git clone https://github.com/casoon/zed-godot-enhanced.git
 cd zed-godot-enhanced
 
-# Build the Rust extension locally
-cargo build
-
-# Link to the local Zed extensions directory used by your Zed installation.
-# This path is under review in issue #3.
-mkdir -p ~/.config/zed/extensions
-ln -s $(pwd) ~/.config/zed/extensions/godot-enhanced
-
-# Restart Zed
+rustup target add wasm32-wasip1
+cargo build --release --target wasm32-wasip1
 ```
+
+Then in Zed: **Extensions → Install Dev Extension…** and select this directory.
+
+- macOS managed path: `~/Library/Application Support/Zed/extensions/installed/`
+- Linux managed path: `~/.config/zed/extensions/installed/`
+
+See [INSTALL_STEPS.md](INSTALL_STEPS.md) and [MANUAL_INSTALL.md](MANUAL_INSTALL.md) for details.
 
 ---
 
@@ -220,17 +209,15 @@ pip install gdformat
 
 ## Testing & Validation
 
-Current validation is limited. `scripts/validate.sh` checks required files and a local host Rust build. `cargo test` currently runs successfully but has no test cases.
-
 ```bash
-# Validation script
+# Repository structure, tests, and WASM build
 ./scripts/validate.sh
 
-# Rust tests
+# Unit tests only
 cargo test
 ```
 
-Missing validation scripts and stronger checks are tracked in [issue #7](https://github.com/casoon/zed-godot-enhanced/issues/7).
+`scripts/validate.sh` checks file structure, runs `cargo test`, and attempts a `wasm32-wasip1` build. The CI workflow runs the same checks automatically.
 
 ### Release-readiness checklist
 
@@ -241,30 +228,22 @@ Missing validation scripts and stronger checks are tracked in [issue #7](https:/
 - [ ] Syntax highlighting correct
 - [ ] Debugging functional
 - [ ] Formatting works
-- [ ] Zed-compatible WebAssembly build verified
-- [ ] Automated tests added
-- [ ] CI workflow passing
+- [ ] Zed-compatible WebAssembly artifact verified to load in Zed
+- [x] Automated tests added (`cargo test`)
+- [x] CI workflow passing
 
 ---
 
 ## Contributing
 
-Contribution guidelines have not been written yet. See [issue #6](https://github.com/casoon/zed-godot-enhanced/issues/6).
-
-### Development Setup
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build, and workflow instructions.
 
 ```bash
-# Clone repository
 git clone https://github.com/casoon/zed-godot-enhanced.git
 cd zed-godot-enhanced
 
-# Install dependencies
-cargo build
-
-# Run tests
+rustup target add wasm32-wasip1
 cargo test
-
-# Validate extension
 ./scripts/validate.sh
 ```
 
@@ -281,7 +260,6 @@ The repository currently contains these docs:
 - [Project summary](PROJECT_SUMMARY.md)
 - [TODO](TODO.md)
 
-The previously linked `docs/*.md` files do not exist yet and are tracked in [issue #6](https://github.com/casoon/zed-godot-enhanced/issues/6).
 
 ---
 
@@ -296,7 +274,7 @@ Based on [GDQuest's zed-gdscript](https://github.com/GDQuest/zed-gdscript) exten
 - Nathan Lovato (@NathanLovato)
 
 **Enhanced by:**
-- Julian Seidel (@jseidel)
+- Jörn Seidel (@casoon)
 
 ---
 
@@ -318,12 +296,12 @@ MIT License - see [LICENSE](LICENSE) file.
 ## Roadmap
 
 - [x] Correct README and project status claims
-- [ ] Verify current Zed local extension install path
-- [ ] Verify WebAssembly extension build
-- [ ] Add real automated tests
-- [ ] Add CI workflow
-- [ ] Add LSP and debug smoke validation
-- [ ] Complete contributor and setup documentation
+- [x] Document Zed local extension install path (macOS + Linux)
+- [x] Add real automated tests (`cargo test`)
+- [x] Add CI workflow (fmt, clippy, test, WASM build)
+- [x] CONTRIBUTING.md and install documentation
+- [ ] Verify WebAssembly artifact loads in Zed
+- [ ] LSP and debug end-to-end smoke validation
 
 ---
 
